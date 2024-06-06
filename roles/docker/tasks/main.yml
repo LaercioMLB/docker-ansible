@@ -1,0 +1,78 @@
+# INSTALL DOCKER
+- name: Update the apt package index
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  tags: docker-install
+
+- name: Install required packages
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+    state: present
+  tags: docker-install
+
+- name: Add Docker’s official GPG key
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+  tags: docker-install
+
+- name: Add the Docker repository
+  ansible.builtin.apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable
+    state: present
+  tags: docker-install
+
+- name: Install Docker Engine
+  ansible.builtin.apt:
+    name: docker-ce
+    state: latest
+    update_cache: yes
+  tags: docker-install
+
+# PULL DOCKER IMAGE
+
+- name: Ensure to compose-service directory exists
+  ansible.builtin.file:
+    path: "{{docker_package_location}}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: yes
+  tags: docker-deploy
+
+- name: Copy Docker Compose file to remote host
+  ansible.builtin.copy:
+    src: "{{ product_package_location }}/compose-service/docker-compose.yaml"
+    dest: "{{docker_package_location}}/docker-compose.yaml"
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  tags: docker-deploy
+
+- name: Start Docker Compose
+  ansible.builtin.shell:
+    chdir: "{{docker_package_location}}"
+    cmd: "docker compose up -d"
+  become: yes
+
+- name: Copy script to remote host
+  ansible.builtin.copy:
+    src: "{{ product_package_location }}/compose-service/docker-network.sh"
+    dest: "{{docker_package_location}}/docker-network.sh"
+    mode: '0755'
+  become: yes
+
+- name: Execute script with network variable
+  ansible.builtin.shell:
+    cmd: "bash {{docker_package_location}}/docker-network.sh {{ network_name }}"
+  vars:
+    network_name: "{{stack_docker}}_wso2-network"
+  become: yes
+  register: script_output

@@ -1,0 +1,16 @@
+{
+    "custom": {
+        "landingPage": {
+            "active": false
+        },
+    "appBar": {
+        "logo": "/site/public/images/valloo-logo.png",
+	"background": "#ECECEC",
+	"searchInputBackground": "#fff",
+        "searchInputActiveBackground": "#fff",
+        "activeBackground": "#1c6584",
+        "showSearch": true,
+        "drawerWidth": 200
+	}
+    }
+}

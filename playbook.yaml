@@ -1,0 +1,14 @@
+---
+- name: Apply common configuration to all nodes
+  hosts: all
+  roles:
+    - docker
+
+# - name: Apply API Manager default configuration to an apim node
+#   hosts:
+#     - all
+#   roles:
+#     - apim
+  # vars_prompt:
+  #   - name: password
+  #     prompt: What is the password to create the superadmin user ?

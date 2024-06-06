@@ -1,0 +1,6 @@
+#VARIAVEL PARA CHEGAR NA PASTA ONDE ESTA OS ARQUIVOS DE COSTUMIZAÇÃO NO ANSIBLE
+product_package_location: files
+
+
+stack_docker: teste
+docker_package_location: "/treeid-labs/{{stack_docker}}"

@@ -1,0 +1,150 @@
+version: '3'
+
+networks:
+  wso2-network:
+    driver: bridge
+    ipam:
+         config:
+           - subnet: 173.19.0.0/16
+             gateway: 173.19.0.1
+
+services:
+
+  wso2am:
+    image: treeid/wso2-am:4.3.0
+    #user: root
+    container_name: wso2am-node-1
+    restart: always
+    environment:
+      - JAVA_OPTS=-Xms256m -Xmx1024m -Dfile.encoding=UTF-8 -Duser.timezone=America/Sao_Paulo #-XX:MaxMetaspaceSize=10g
+    volumes:
+      - type: volume
+        source: wso2am-4.3.0_data
+        target: /home/wso2carbon/wso2am-4.3.0
+      - type: volume
+        source: wso2am-4.3.0-shared_data
+        target: /home/wso2carbon/wso2am-4.3.0/repository/deployment/server
+      - type: volume
+        source: wso2-properties_data
+        target: /home/wso2carbon/wso2am-4.3.0/home.properties
+    ports:
+      - "9444:9443"
+      - "8280:8280"
+      - "8243:8243"
+      # - "10397:10397"
+      # - "7711:7711"
+    networks:
+      wso2-network:
+        ipv4_address: 173.19.0.10
+
+  wso2mi-dashboard:
+    image: treeid/wso2-mi-dashboard:4.2.0
+    container_name: wso2mi-dashboard
+    restart: always
+    volumes:
+      - type: volume
+        source: wso2mi-dashboard-4.2.0_data
+        target: /home/wso2carbon/wso2mi-dashboard-4.2.0
+    ports:
+      - "9743:9743"
+    networks:
+      wso2-network:
+        ipv4_address: 173.19.0.20
+
+  wso2mi:
+    image: treeid/wso2-mi:4.2.0
+    container_name: wso2mi
+    #user: root
+    restart: always
+    ports:
+      - "8290:8290"
+      - "8253:8253"
+      - "9201:9201"
+      - "9174:9174"
+    environment:
+      - JAVA_OPTS=-Xms256m -Xmx1024m -Dfile.encoding=UTF-8 -Duser.timezone=America/Sao_Paulo #-XX:MaxMetaspaceSize=10g
+    volumes:
+      - type: volume
+        source: wso2mi-4.2.0_data
+        target: /home/wso2carbon/wso2mi-4.2.0
+      - type: volume
+        source: wso2mi-4.2.0-shared_data
+        target: /home/wso2carbon/wso2mi-4.2.0/repository/deployment/server
+      - type: volume
+        source: wso2-properties_data
+        target: /home/wso2carbon/wso2mi-4.2.0/home.properties
+      - type: volume
+        source: wso2logs-vol
+        target: /logs
+    networks:
+      wso2-network:
+        ipv4_address: 173.19.0.30
+
+  wso2mi-test-server:
+    image: treeid/wso2-mi:4.2.0
+    container_name: wso2mi-test-server
+    user: root
+    restart: always
+    volumes:
+      - type: volume
+        source: wso2logs-vol
+        target: /logs
+    ports:
+      - "8293:8290"
+      - "9008:9008"
+    environment:
+      - JAVA_OPTS=-Xms256m -Xmx1024m -DsynapseTest -Dfile.encoding=UTF-8 -Duser.timezone=America/Sao_Paulo #-XX:MaxMetaspaceSize=10g
+    networks:
+      wso2-network:
+        ipv4_address: 173.19.0.40
+
+  wso2si:
+    image: treeid/wso2-si:4.2.0
+    container_name: wso2si
+    restart: always
+    ports:
+      - "9390:9443"
+      - "9005:9005"
+      - "8006:8006"
+    environment:
+      - JAVA_OPTS=-Xms256m -Xmx1024m -Dfile.encoding=UTF-8 -Duser.timezone=America/Sao_Paulo #-XX:MaxMetaspaceSize=10g
+    volumes:
+      - type: volume
+        source: wso2si-4.2.0_data
+        target: /home/wso2carbon/wso2si-4.2.0
+    networks:
+        wso2-network:
+          ipv4_address: 173.19.0.50
+
+  wso2is:
+    image: treeid/wso2-is:7.0.1
+    container_name: wso2is
+    #user: root
+    restart: always
+    ports:
+      - "9445:9445"
+    environment:
+      - JAVA_OPTS=-Xms256m -Xmx1024m -Dfile.encoding=UTF-8 -Duser.timezone=America/Sao_Paulo #-XX:MaxMetaspaceSize=10g
+    volumes:
+      - type: volume
+        source: wso2is-7.0.1_data
+        target: /home/wso2carbon/wso2is-7.0.1-SNAPSHOT
+      - type: volume
+        source: wso2is-7.0.1-shared_data
+        target: /home/wso2carbon/wso2is-7.0.1-SNAPSHOT/repository/deployment/server
+    networks:
+        wso2-network:
+          ipv4_address: 173.19.0.60
+
+volumes:
+  wso2am-4.3.0_data:
+  wso2am-4.3.0-shared_data:
+  wso2mi-4.2.0_data:
+  wso2mi-4.2.0-shared_data:
+  wso2-properties_data:
+  wso2si-4.2.0_data:
+  wso2mi-dashboard-4.2.0_data:
+  wso2is-7.0.1_data:
+  wso2is-7.0.1-shared_data:
+  wso2logs-vol:
+    external: true
